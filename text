@@ -1,0 +1,64 @@
+Interpreter to run C file just like a script without generating a intermediate Object file.
+
+1. next() for lexical analysis; get the next token; will ignore spaces tabs
+etc.
+2. program() main entrance for parser.
+3. expression(level): parse expression; 
+
+4. eval(): the entrance for virtual machine; used to interpret target
+instructions.
+
+=> flex used for lexical analysis, 
+=> bison for parsing.
+
+virtual machine for the project is taken from c4 project for the C virtual machine
+which means this can run on any platform having c4 machine
+since we need to take care about memory allocation, registers and CPU for the Interpreter
+
+Structure of symbol table
+
+token: is the token type of an identifier. Theoretically it should be fixed to type Id. But it is not true because we will add keywords(e.g if, while) as special kinds of identifier.
+hash: the hash value of the name of the identifier, to speed up the comparision of table lookup.
+name: well, name of the identifier.
+class: Whether the identifier is global, local or constants.
+type: type of the identifier, int, char or pointer.
+value: the value of the variable that the identifier points to.
+BXXX: local variable can shadow global variable. It is used to store global ones if that happens.
+
+struct identifier {
+    int token;
+    int hash;
+    char * name;
+    int class;
+    int type;
+    int value;
+    int Bclass;
+    int Btype;
+    int Bvalue;
+}
+
+
+Grammar for variables
+
+program ::= {global_declaration}+
+
+global_declaration ::= enum_decl | variable_decl | function_decl
+
+enum_decl ::= 'enum' [id] '{' id ['=' 'num'] {',' id ['=' 'num'] '}'
+
+variable_decl ::= type {'*'} id { ',' {'*'} id } ';'
+
+function_decl ::= type {'*'} id '(' parameter_decl ')' '{' body_decl '}'
+
+parameter_decl ::= type {'*'} id {',' type {'*'} id}
+
+body_decl ::= {variable_decl}, {statement}
+
+statement ::= non_empty_statement | empty_statement
+
+non_empty_statement ::= if_statement | while_statement | '{' statement '}'
+                     | 'return' expression | expression ';'
+
+if_statement ::= 'if' '(' expression ')' statement ['else' non_empty_statement]
+
+while_statement ::= 'while' '(' expression ')' non_empty_statement
